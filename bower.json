@@ -1,0 +1,28 @@
+{
+  "name": "ng-websql",
+  "main": "./dist/ng-websql.js",
+  "version": "0.0.1",
+  "homepage": "https://github.com/bentonam/ng-websql",
+  "authors": [
+    "Aaron Benton"
+  ],
+  "description": "AngularJS wrapper for WebSQL",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "ng-websql",
+    "api",
+    "angularjs",
+    "websql",
+    "web sql"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
