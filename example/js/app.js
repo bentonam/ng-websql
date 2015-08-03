@@ -106,6 +106,33 @@ app.constant( "EMPLOYEES", [
 		birth_date: "1990-25-01",
 		title_id: 1,
 		department_id: 1
+	},
+	{
+		first_name: "George",
+		last_name: "Smith",
+		email: "george.smith@mail.com",
+		gender: "M",
+		birth_date: "1988-17-05",
+		title_id: 3,
+		department_id: 1
+	},
+	{
+		first_name: "Michael",
+		last_name: "Jones",
+		email: "michael.jones@mail.com",
+		gender: "M",
+		birth_date: "1989-14-08",
+		title_id: 4,
+		department_id: 1
+	},
+	{
+		first_name: "Jane",
+		last_name: "Doe",
+		email: "jane.doe@mail.com",
+		gender: "F",
+		birth_date: "1991-25-02",
+		title_id: 2,
+		department_id: 2
 	}
 ] )
 app.run( function( $db, DB_CONFIG, TITLES, DEPTS, EMPLOYEES ){
@@ -139,6 +166,6 @@ app.run( function( $db, DB_CONFIG, TITLES, DEPTS, EMPLOYEES ){
 		return;
 
 })
-app.controller("AppCtrl", function($scope, $db ){
+app.controller("AppCtrl", function( $scope, $db ){
 
-});
+} );
