@@ -104,10 +104,9 @@ angular
 		return deferred.promise;
 	};
 	/**
-	* Execute a query and return a an array of objects or just an object
+	* Executes a query and returns a promise which will return the SQLResultSet object from the query
 	* @statement The SQL statement to be executed
 	* @bindings Any query bindings
-	* @single Whether or not to return a single record as an object
 	*/
 	self.query = function( statement, bindings ) {
 		var deferred = $q.defer();
@@ -130,16 +129,16 @@ angular
 	/**
 	* Drops database objects i.e. tables, views, indexes
 	* @object_name The name of the object to drop
-	* @type The type of object to drop i.e. TABLE, INDEX, VIEW
+	* @object_type The type of object to drop i.e. TABLE, INDEX, VIEW
 	*/
-	self.drop = function( object_name, type ) {
+	self.drop = function( object_name, object_type ) {
 		var deferred = $q.defer();
-		if( "TABLE,INDEX,VIEW".indexOf( type.toUpperCase() ) === -1 ){
+		if( "TABLE,INDEX,VIEW".indexOf( object_type.toUpperCase() ) === -1 ){
 			deferred.reject( "Invalid object type" );
 		}
 		else{
 			self
-				.query( "DROP " + type + " " + object_name )
+				.query( "DROP " + object_type + " " + object_name )
 				.then( function() {
 					deferred.resolve();
 				} );
@@ -147,18 +146,18 @@ angular
 		return deferred.promise;
 	};
 	/**
-	* Drops and recreates and index on a table
-	* @name Name of the index
+	* Drops and recreates an index on a table
+	* @index_name Name of the index to create to drop and recreate
 	* @table Table to create the index on
 	* @columns The columns to create the index for
-	* @unique Whether or not it is a unique index
+	* @unique Boolean for whether or not it is a unique index
 	*/
-	self.index = function( name, table, columns, unique ) {
+	self.index = function( index_name, table, columns, unique ) {
 		var deferred = $q.defer();
 		$q.all(
 			[
-				self.query( "DROP INDEX " + name ),
-				self.query( "CREATE " + ( unique ? "UNIQUE " : "" ) + "INDEX " + name + " ON " + table + " ( " + columns.join( "," ) + " )" )
+				self.query( "DROP INDEX " + index_name ),
+				self.query( "CREATE " + ( unique ? "UNIQUE " : "" ) + "INDEX " + index_name + " ON " + table + " ( " + columns.join( "," ) + " )" )
 			]
 		)
 		.then( function( ) {
@@ -167,18 +166,17 @@ angular
 		return deferred.promise;
 	};
 	/**
-	* Drops and recreates and view on a table
-	* @name Name of the index
-	* @table Table to create the index on
-	* @columns The columns to create the index for
-	* @unique Whether or not it is a unique index
+	* Drops and recreates a view on a table
+	* @view_name Name of the index to drop and recreate
+	* @statement The SQL SELECT statement to use in the view
+	* @temp Whether or not the view is temporary
 	*/
 	self.view = function( name, statement, temp ) {
 		var deferred = $q.defer();
 		$q.all(
 			[
-				self.query( "DROP VIEW " + name ),
-				self.query( "CREATE " + ( temp ? "TEMP " : "" ) + "VIEW " + name + " AS " + statement )
+				self.query( "DROP VIEW " + view_name ),
+				self.query( "CREATE " + ( temp ? "TEMP " : "" ) + "VIEW " + view_name + " AS " + statement )
 			]
 		)
 		.then( function( ) {
@@ -187,14 +185,17 @@ angular
 		return deferred.promise;
 	};
 	/**
-	* Recreates the database by dropping an recreating all tables base on the config
+	* Recreates the database by dropping and recreating all objects based on the config
 	*/
 	self.recreate = function() {
 		var statements = [],
 			deferred = $q.defer();
 		self.config.logging && console.log("Recreating Database: " + self.config.name);
 		angular.forEach( self.config.tables, function( table ) {
-			statements.push( self.query( "DROP TABLE " + table.name ) );
+			statements.push( self.drop( table.name, "TABLE" ) );
+		} );
+		angular.forEach( self.config.views, function( view ) {
+			statements.push( self.drop( view.name, "VIEW" ) );
 		} );
 		$q
 			.all( statements )
@@ -216,7 +217,7 @@ angular
 	};
 	/**
 	* Gets all of the columns for a table based on its create statement
-	* @table
+	* @table The name of the table to get the columns for
 	*/
 	self.columns = function( table ) {
 		return self
@@ -235,7 +236,7 @@ angular
 	};
 	/**
 	* Gets the entire resultset as an array of objects
-	* @result The result of a query
+	* @result The SQLResultSet object from a query
 	*/
 	self.resultset = function( result ) {
 		var data = [];
@@ -246,7 +247,7 @@ angular
 	};
 	/**
 	* Gets a single row from the resultset as an object
-	* @result The result of a query
+	* @result The SQLResultSet object from a query
 	* @index (optional) The row index to retrieve, default 0
 	*/
 	self.row = function( result, index ) {
